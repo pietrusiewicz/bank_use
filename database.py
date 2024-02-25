@@ -52,6 +52,34 @@ def add_transaction(cursor, id_konta, data, kwota, waluta, typ_transakcji, opis)
     cursor.execute('''INSERT INTO Transakcje (id_konta, data, kwota, waluta, typ_transakcji, opis)
                       VALUES (?, ?, ?, ?, ?, ?)''', (id_konta, data, kwota, waluta, typ_transakcji, opis))
 
+# Funkcja do usuwania klienta
+def usun_klienta(id_klienta):
+    conn = sqlite3.connect('moja_baza.db')
+    c = conn.cursor()
+    c.execute("DELETE FROM Klienci WHERE id=?", (id_klienta,))
+    conn.commit()
+    print("Klient o ID:", id_klienta, "został usunięty.")
+    conn.close()
+
+# Funkcja do usuwania konta
+def usun_konto(id_konta):
+    conn = sqlite3.connect('moja_baza.db')
+    c = conn.cursor()
+    c.execute("DELETE FROM Konta WHERE id=?", (id_konta,))
+    conn.commit()
+    print("Konto o ID:", id_konta, "zostało usunięte.")
+    conn.close()
+
+# Funkcja do usuwania transakcji
+def usun_transakcje(id_transakcji):
+    conn = sqlite3.connect('moja_baza.db')
+    c = conn.cursor()
+    c.execute("DELETE FROM Transakcje WHERE id=?", (id_transakcji,))
+    conn.commit()
+    print("Transakcja o ID:", id_transakcji, "została usunięta.")
+    conn.close()
+
+
 # Funkcja testowa wykonująca kilka operacji na bazie danych
 def add_test_records():
     # Połączenie z bazą danych
