@@ -80,12 +80,9 @@ class Database:
     # Funkcja testowa wykonująca kilka operacji na bazie danych
     def add_test_records(self):
         # Połączenie z bazą danych
-
-        # Utworzenie tabel, jeśli nie istnieją
         self.create_table_clients()
         self.create_table_accounts()
         self.create_table_transactions()
-
         # Dodanie przykładowych danych
         self.add_client('Jan', 'Kowalski', 'ul. Testowa 123', '12345678901', 'jan@example.com', '123456789')
         self.add_client('Anna', 'Nowak', 'ul. Nowa 1', '98765432109', 'anna@example.com', '987654321')
@@ -104,18 +101,32 @@ class Database:
     def display_clients(self):
         rows = self.get_clients()
         print("Clients:")
-        field_names = ["imie", "nazwisko", "adres", "PESEL", "email", "telefon"]
+        #field_names = ["imie", "nazwisko", "adres", "PESEL", "email", "telefon"]
         for row in rows:
             print('| {:1} | {:^10} | {:^20} | {:^20} | {:^11} | {:^20} | {:^9}'.format(*row))
 
-    # Funkcja do wyświetlania kont
-    def wyswietl_konta(self):
+    def get_accounts(self):
         self.cursor.execute("SELECT * FROM Konta")
         rows = self.cursor.fetchall()
-        print("Konta:")
+        return rows
+
+    def display_accounts(self):
+        rows = self.get_accounts()
+        print("Accounts:")
         for row in rows:
-            print(row)
-        self.conn.close()
+            print('| {:1} | {:^10} | {:^28} | {:^10} | {:^3} | {:^20} |'.format(*row))
+
+    def get_transactions(self):
+        self.cursor.execute("SELECT * FROM Transakcje")
+        rows = self.cursor.fetchall()
+        return rows
+
+    def display_transactions(self):
+        rows = self.get_transactions()
+        print("Accounts:")
+        for row in rows:
+            print('| {:1} | {:^1} | {:^10} | {:3} | {:^10} | {:^30} |'.format(*row))
+
 
     # Funkcja do wyświetlania transakcji
     def wyswietl_transakcje(self):
@@ -129,3 +140,5 @@ class Database:
 if __name__ == "__main__":
     d = Database()
     d.display_clients()
+    d.display_accounts()
+    d.display_transactions()
