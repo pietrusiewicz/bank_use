@@ -9,6 +9,7 @@ Order implementation (todolist):
   </ul>
   <li>flask</li>
   <ul>
+    <li>make pretty website</li>
     <li>migrate to sqlalchemy while flask</li>
   </ul>
   <li>docker</li>
