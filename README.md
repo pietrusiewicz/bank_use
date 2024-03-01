@@ -13,7 +13,7 @@ Order implementation (todolist):
   </ul>
   <li>docker</li>
   <ul>
-    <li>move to </li>
+    <li>move to docker</li>
   </ul>
 </ol>
 <h2>1. Klienci:</h2>
