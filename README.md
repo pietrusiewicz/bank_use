@@ -1,5 +1,21 @@
 <h1>Bank application what uses Flask what uses Docker, SQL, Python</h1>
-
+Order implementation (todolist):
+<ol>
+  <li>python/sql</li>
+  <ul>
+    <li>englishing tables</li>
+    <li>implementing demo console application</li>
+    <li>migrate to sqlalchemy while flask</li>
+  </ul>
+  <li>flask</li>
+  <ul>
+    <li>migrate to sqlalchemy while flask</li>
+  </ul>
+  <li>docker</li>
+  <ul>
+    <li>move to </li>
+  </ul>
+</ol>
 <h2>1. Klienci:</h2>
 <ul>
   <li>id (int, primary key)</li>
