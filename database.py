@@ -6,71 +6,76 @@ class Database:
         self.conn = sqlite3.connect('bank.db')
         self.cursor = self.conn.cursor()
 
-    # Funkcja tworząca tabeli Klienci
-    def create_table_clients(self):
-        self.cursor.execute('''CREATE TABLE IF NOT EXISTS Klienci (
-                            id INTEGER PRIMARY KEY,
-                            imie VARCHAR(255),
-                            nazwisko VARCHAR(255),
-                            adres VARCHAR(255),
-                            pesel VARCHAR(11),
-                            email VARCHAR(255),
-                            telefon VARCHAR(255)
-                        )''')
 
-    # Funkcja tworząca tabeli Konta
-    def create_table_accounts(self):
-        self.cursor.execute('''CREATE TABLE IF NOT EXISTS Konta (
-                            id INTEGER PRIMARY KEY,
-                            id_klienta INTEGER,
-                            numer_rachunku VARCHAR(26),
-                            saldo DECIMAL(10,2),
-                            waluta VARCHAR(3),
-                            typ_konta VARCHAR(255),
-                            FOREIGN KEY (id_klienta) REFERENCES Klienci(id)
-                        )''')
+    def create(self):
+        "Function creates database Klienci-Transakcje-Konto"
+        def create_table_clients(self):
+            "Function creates table Klienci"
+            self.cursor.execute('''CREATE TABLE IF NOT EXISTS Klienci (
+                                id INTEGER PRIMARY KEY,
+                                imie VARCHAR(255),
+                                nazwisko VARCHAR(255),
+                                adres VARCHAR(255),
+                                pesel VARCHAR(11),
+                                email VARCHAR(255),
+                                telefon VARCHAR(255)
+                            )''')
 
-    # Funkcja tworząca tabeli Transakcje
-    def create_table_transactions(self):
-        self.cursor.execute('''CREATE TABLE IF NOT EXISTS Transakcje (
-                            id INTEGER PRIMARY KEY,
-                            id_konta INTEGER,
-                            data DATETIME,
-                            kwota DECIMAL(10,2),
-                            waluta VARCHAR(3),
-                            typ_transakcji VARCHAR(255),
-                            opis VARCHAR(255),
-                            FOREIGN KEY (id_konta) REFERENCES Konta(id)
-                        )''')
+        def create_table_accounts(self):
+            "Function creates table Konta"
+            self.cursor.execute('''CREATE TABLE IF NOT EXISTS Konta (
+                                id INTEGER PRIMARY KEY,
+                                id_klienta INTEGER,
+                                numer_rachunku VARCHAR(26),
+                                saldo DECIMAL(10,2),
+                                waluta VARCHAR(3),
+                                typ_konta VARCHAR(255),
+                                FOREIGN KEY (id_klienta) REFERENCES Klienci(id)
+                            )''')
 
-    # Funkcja dodająca klienta
+        def create_table_transactions(self):
+            "Function creates table Transakcje"
+            self.cursor.execute('''CREATE TABLE IF NOT EXISTS Transakcje (
+                                id INTEGER PRIMARY KEY,
+                                id_konta INTEGER,
+                                data DATETIME,
+                                kwota DECIMAL(10,2),
+                                waluta VARCHAR(3),
+                                typ_transakcji VARCHAR(255),
+                                opis VARCHAR(255),
+                                FOREIGN KEY (id_konta) REFERENCES Konta(id)
+                            )''')
+
+
+    # Function adds Klient
     def add_client(self, imie, nazwisko, adres, pesel, email, telefon):
         self.cursor.execute('''INSERT INTO Klienci (imie, nazwisko, adres, pesel, email, telefon)
                           VALUES (?, ?, ?, ?, ?, ?)''', (imie, nazwisko, adres, pesel, email, telefon))
 
-    # Funkcja dodająca konto
+    # Function adds Konto
     def add_account(self, id_klienta, numer_rachunku, saldo, waluta, typ_konta):
         self.cursor.execute('''INSERT INTO Konta (id_klienta, numer_rachunku, saldo, waluta, typ_konta)
                           VALUES (?, ?, ?, ?, ?)''', (id_klienta, numer_rachunku, saldo, waluta, typ_konta))
 
-    # Funkcja dodająca transakcję
+    # Function adds Transakcja
     def add_transaction(self, id_konta, data, kwota, waluta, typ_transakcji, opis):
         self.cursor.execute('''INSERT INTO Transakcje (id_konta, data, kwota, waluta, typ_transakcji, opis)
                           VALUES (?, ?, ?, ?, ?, ?)''', (id_konta, data, kwota, waluta, typ_transakcji, opis))
 
-    # Funkcja do usuwania klienta
+
+    # Function removes Klient
     def usun_klienta(self, id_klienta):
         self.cursor.execute("DELETE FROM Klienci WHERE id=?", (id_klienta,))
         self.conn.commit()
         print("Klient o ID:", id_klienta, "został usunięty.")
 
-    # Funkcja do usuwania konta
+    # Function removes Konto
     def usun_konto(self, id_konta):
         self.cursor.execute("DELETE FROM Konta WHERE id=?", (id_konta,))
         self.conn.commit()
         print("Konto o ID:", id_konta, "zostało usunięte.")
 
-    # Funkcja do usuwania transakcji
+    # Function removes Transakcja
     def usun_transakcje(self, id_transakcji):
         self.cursor.execute("DELETE FROM Transakcje WHERE id=?", (id_transakcji,))
         self.conn.commit()
@@ -98,6 +103,17 @@ class Database:
         rows = self.cursor.fetchall()
         return rows
 
+    def get_accounts(self):
+        self.cursor.execute("SELECT * FROM Konta")
+        rows = self.cursor.fetchall()
+        return rows
+
+    def get_transactions(self):
+        self.cursor.execute("SELECT * FROM Transakcje")
+        rows = self.cursor.fetchall()
+        return rows
+
+
     def display_clients(self):
         rows = self.get_clients()
         print("Clients:")
@@ -105,21 +121,11 @@ class Database:
         for row in rows:
             print('| {:1} | {:^10} | {:^20} | {:^20} | {:^11} | {:^20} | {:^9}'.format(*row))
 
-    def get_accounts(self):
-        self.cursor.execute("SELECT * FROM Konta")
-        rows = self.cursor.fetchall()
-        return rows
-
     def display_accounts(self):
         rows = self.get_accounts()
         print("Accounts:")
         for row in rows:
             print('| {:1} | {:^10} | {:^28} | {:^10} | {:^3} | {:^20} |'.format(*row))
-
-    def get_transactions(self):
-        self.cursor.execute("SELECT * FROM Transakcje")
-        rows = self.cursor.fetchall()
-        return rows
 
     def display_transactions(self):
         rows = self.get_transactions()
@@ -128,14 +134,6 @@ class Database:
             print('| {:1} | {:^1} | {:^10} | {:3} | {:^10} | {:^30} |'.format(*row))
 
 
-    # Funkcja do wyświetlania transakcji
-    def wyswietl_transakcje(self):
-        self.cursor.execute("SELECT * FROM Transakcje")
-        rows = self.cursor.fetchall()
-        print("Transakcje:")
-        for row in rows:
-            print(row)
-        self.conn.close()
 
 if __name__ == "__main__":
     d = Database()
