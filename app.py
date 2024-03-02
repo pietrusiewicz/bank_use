@@ -37,12 +37,7 @@ class App:
             select = input("""a-ADD u-UPDATE d-DELETE
             """).lower()
             if select == 'a':
-                imie = input("\nPodaj imie: ")
-                nazwisko = input("\nPodaj nazwisko: ")
-                adres = input("\nPodaj adres: ")
-                pesel = input("\nPodaj pesel: ")
-                email = input("\nPodaj email: ")
-                numer = input("\nPodaj numer telefonu: ")
+                imie,nazwisko,adres,pesel,email,numer=[input("imie: "),input("nazwisko: "),input("adres: "),input("pesel: "),input("email: "),input("nr telefonu: ")]
 
                 self.d.add_client(imie,nazwisko,adres,pesel,email,numer)
 
@@ -62,7 +57,24 @@ class App:
         while True:
             self.d.display_accounts()
             select = input("""a-ADD u-UPDATE d-DELETE
-            """)
+            """).lower()
+
+            if select == 'a':
+                id_klienta,nr_rachunku,saldo,waluta,typ_konta = [input("id_klienta: "),input("numer_rachunku: "),input("saldo: "),input("waluta: "),input("typ konta: ")]
+
+                self.d.add_account(id_klienta,nr_rachunku,saldo,waluta,typ_konta)
+
+            if select == 'u':
+                fields = ["id_klienta","nr_rachunku","saldo","waluta","typ_konta"]
+                i = int(input("UPDATE)\npodaj id\n"))
+                field = fields[int(input(f"Podaj pole:\n{list(enumerate(fields))}"))]
+                value = input("podaj wartosc\n")
+
+                self.d.update_account(field,value,i)
+
+            if select == 'd':
+                i = input("podaj id\n")
+                self.d.usun_konto(i)
 
     def manage_transactions(self):
         while True:
