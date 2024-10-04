@@ -13,8 +13,8 @@ This is a simple bank application built using Flask, Docker, and SQLite. The app
 ### 1. Clone the Repository
 
 ```sh
-git clone <repository-url>
-cd <repository-directory>
+git clone https://github.com/pietrusiewicz/bank_use.git
+cd bank_use
 ```
 ### 2. Initialize the Database
 
