@@ -1,86 +1,43 @@
-from database import Database
+from flask import Flask, request, jsonify
+import sqlite3
 
-class App:
-    def __init__(self):
-        self.d = Database()
-        self.menu()
+app = Flask(__name__)
+DATABASE = 'bank.db'
 
+def get_db():
+    conn = sqlite3.connect(DATABASE)
+    return conn
 
-    def menu(self):
-        """
-        Primitive demo database play:
-            select table:
-            1) Klienci
-            2) Konta
-            3) Transakcje
-        After select displays database with hotkeys to operate
-        """
-        while True:
-            select = input("""select table:
-                1) Klienci
-                2) Konta
-                3) Transakcje
-            """)
-            
-            if select == '1':
-                self.manage_clients()
+@app.route('/clients', methods=['GET'])
+def get_clients():
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM Klienci")
+    rows = cursor.fetchall()
+    conn.close()
+    return jsonify(rows)
 
-            if select == '2':
-                self.manage_accounts()
+@app.route('/clients', methods=['POST'])
+def add_client():
+    data = request.get_json()
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO Klienci (name, surname, address, pesel, email, phone) VALUES (?, ?, ?, ?, ?, ?)",
+                   (data['name'], data['surname'], data['address'], data['pesel'], data['email'], data['phone']))
+    conn.commit()
+    conn.close()
+    return jsonify({'status': 'Client added'}), 201
 
-            if select == '3':
-                self.manage_transactions()
+@app.route('/clients/<int:id>', methods=['DELETE'])
+def delete_client(id):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM Klienci WHERE id=?", (id,))
+    conn.commit()
+    conn.close()
+    return jsonify({'status': 'Client deleted'})
 
-    def manage_clients(self):
-        while True:
-            self.d.display_clients()
-            select = input("""a-ADD u-UPDATE d-DELETE
-            """).lower()
-            if select == 'a':
-                imie,nazwisko,adres,pesel,email,numer=[input("imie: "),input("nazwisko: "),input("adres: "),input("pesel: "),input("email: "),input("nr telefonu: ")]
-
-                self.d.add_client(imie,nazwisko,adres,pesel,email,numer)
-
-            if select == 'u':
-                fields = ["imie","nazwisko","adres","pesel","email","numer telefonu"]
-                i = int(input("UPDATE)\npodaj id\n"))
-                field = fields[int(input(f"Podaj pole:\n{list(enumerate(fields))}"))]
-                value = input("podaj wartosc\n")
-
-                self.d.update_client(field,value,i)
-
-            if select == 'd':
-                i = input("podaj id\n")
-                self.d.usun_klienta(i)
-
-    def manage_accounts(self):
-        while True:
-            self.d.display_accounts()
-            select = input("""a-ADD u-UPDATE d-DELETE
-            """).lower()
-
-            if select == 'a':
-                id_klienta,nr_rachunku,saldo,waluta,typ_konta = [input("id_klienta: "),input("numer_rachunku: "),input("saldo: "),input("waluta: "),input("typ konta: ")]
-
-                self.d.add_account(id_klienta,nr_rachunku,saldo,waluta,typ_konta)
-
-            if select == 'u':
-                fields = ["id_klienta","nr_rachunku","saldo","waluta","typ_konta"]
-                i = int(input("UPDATE)\npodaj id\n"))
-                field = fields[int(input(f"Podaj pole:\n{list(enumerate(fields))}"))]
-                value = input("podaj wartosc\n")
-
-                self.d.update_account(field,value,i)
-
-            if select == 'd':
-                i = input("podaj id\n")
-                self.d.usun_konto(i)
-
-    def manage_transactions(self):
-        while True:
-            self.d.display_transactions()
-            select = input("""a-ADD u-UPDATE d-DELETE
-            """)
+# Similar routes for accounts and transactions can be added here
 
 if __name__ == '__main__':
-    a = App()
+    app.run(host='0.0.0.0', port=5000)
