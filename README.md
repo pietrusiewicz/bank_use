@@ -50,17 +50,7 @@ curl -X GET http://localhost:5000/clients
 URL: /clients
 Method: POST
 Description: Adds a new client.
-Body (JSON):
-```json
-{
-  "name": "John",
-  "surname": "Doe",
-  "address": "123 Main St",
-  "pesel": "12345678901",
-  "email": "john.doe@example.com",
-  "phone": "123-456-7890"
-}
-```
+Request with JSON:
 ```sh
 curl -X POST http://localhost:5000/clients -H "Content-Type: application/json" -d '{
   "name": "John",
