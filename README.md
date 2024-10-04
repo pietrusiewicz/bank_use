@@ -34,6 +34,14 @@ docker-compose up --build
 This command will build the Docker image and start the Flask application. The application will be accessible at http://localhost:5000.
 
 ### 4. Usage
+### Warning!
+To use **curl** command you have to enter container' cli:
+```sh
+docker exec -it <container_id> /bin/bash
+```
+<sub>
+<b>container_id</b> is contained in ```sh docker ps```
+</sub>
 
 #### Get All Clients
 <ul>
@@ -46,7 +54,7 @@ This command will build the Docker image and start the Flask application. The ap
 curl -X GET http://localhost:5000/clients
 ```
 
-##### Add a New Client
+#### Add a New Client
 URL: /clients
 Method: POST
 Description: Adds a new client.
@@ -62,7 +70,7 @@ curl -X POST http://localhost:5000/clients -H "Content-Type: application/json" -
 }'
 ```
 
-##### Delete a Client
+#### Delete a Client
 URL: /clients/<id>
 Method: DELETE
 Description: Deletes a client by ID.
@@ -70,7 +78,7 @@ Description: Deletes a client by ID.
 curl -X DELETE http://localhost:5000/clients/1
 ```
 
-###### Stopping the Application
+#### Stopping the Application
 To stop the application, press Ctrl+C in the terminal where docker-compose up is running, or run:
 ```sh
 docker-compose down
