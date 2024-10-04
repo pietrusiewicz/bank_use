@@ -39,9 +39,9 @@ To use **curl** command you have to enter container' cli:
 ```sh
 docker exec -it <container_id> /bin/bash
 ```
-<sub>
-<b>container_id</b> is contained in ```sh docker ps```
-</sub>
+<sup>
+<b>container_id</b> is contained in command <u><i>docker ps</i></u>
+</sup>
 
 #### Get All Clients
 <ul>
