@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 import sqlite3
 
 app = Flask(__name__)
@@ -7,6 +7,10 @@ DATABASE = 'bank.db'
 def get_db():
     conn = sqlite3.connect(DATABASE)
     return conn
+
+@app.route('/')
+def index():
+    return render_template('index.html')
 
 @app.route('/clients', methods=['GET'])
 def get_clients():
@@ -36,8 +40,6 @@ def delete_client(id):
     conn.commit()
     conn.close()
     return jsonify({'status': 'Client deleted'})
-
-# Similar routes for accounts and transactions can be added here
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
