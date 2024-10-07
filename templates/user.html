@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Panel</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        form { margin-bottom: 20px; }
+        input, button { margin: 5px; }
+    </style>
+</head>
+<body>
+    <h1>User Panel</h1>
+    <p>Welcome, {{ username }}! <a href="{{ url_for('logout') }}">Logout</a></p>
+
+    <h2>Update Your Data</h2>
+    <form id="updateUserForm">
+        <input type="text" id="updateName" placeholder="Name">
+        <input type="text" id="updateSurname" placeholder="Surname">
+        <input type="text" id="updateAddress" placeholder="Address">
+        <input type="text" id="updatePesel" placeholder="PESEL">
+        <input type="email" id="updateEmail" placeholder="Email">
+        <input type="text" id="updatePhone" placeholder="Phone">
+        <button type="submit">Update Data</button>
+    </form>
+
+    <script>
+        document.getElementById('updateUserForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const data = {
+                name: document.getElementById('updateName').value,
+                surname: document.getElementById('updateSurname').value,
+                address: document.getElementById('updateAddress').value,
+                pesel: document.getElementById('updatePesel').value,
+                email: document.getElementById('updateEmail').value,
+                phone: document.getElementById('updatePhone').value
+            };
+            fetch(`/clients/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            }).then(response => response.json())
+              .then(data => {
+                  alert('Data updated');
+                  document.getElementById('updateUserForm').reset();
+              });
+        });
+    </script>
+</body>
+</html>

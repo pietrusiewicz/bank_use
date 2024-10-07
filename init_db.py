@@ -3,6 +3,7 @@ import sqlite3
 conn = sqlite3.connect('bank.db')
 cursor = conn.cursor()
 
+# Create Clients table
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS Klienci (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -11,11 +12,19 @@ CREATE TABLE IF NOT EXISTS Klienci (
     address TEXT NOT NULL,
     pesel TEXT NOT NULL,
     email TEXT NOT NULL,
-    phone TEXT NOT NULL
+    phone TEXT NOT NULL,
+    balance REAL DEFAULT 0.0
 )
 ''')
 
-# Similar table creation for accounts and transactions
+# Create Users table
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS Users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL UNIQUE,
+    password TEXT NOT NULL
+)
+''')
 
 conn.commit()
 conn.close()

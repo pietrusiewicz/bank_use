@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bank Application</title>
+    <title>Admin Panel</title>
     <style>
         body { font-family: Arial, sans-serif; }
         form { margin-bottom: 20px; }
@@ -11,7 +11,7 @@
     </style>
 </head>
 <body>
-    <h1>Bank Application</h1>
+    <h1>Admin Panel</h1>
     <p>Welcome, {{ username }}! <a href="{{ url_for('logout') }}">Logout</a></p>
 
     <h2>Add Client</h2>
@@ -22,6 +22,7 @@
         <input type="text" id="pesel" placeholder="PESEL" required>
         <input type="email" id="email" placeholder="Email" required>
         <input type="text" id="phone" placeholder="Phone" required>
+        <input type="number" step="0.01" id="balance" placeholder="Balance" required>
         <button type="submit">Add Client</button>
     </form>
 
@@ -35,6 +36,7 @@
         <input type="text" id="updatePesel" placeholder="PESEL">
         <input type="email" id="updateEmail" placeholder="Email">
         <input type="text" id="updatePhone" placeholder="Phone">
+        <input type="number" step="0.01" id="updateBalance" placeholder="Balance">
         <button type="submit">Update Client</button>
     </form>
 
@@ -57,7 +59,8 @@
                 address: document.getElementById('address').value,
                 pesel: document.getElementById('pesel').value,
                 email: document.getElementById('email').value,
-                phone: document.getElementById('phone').value
+                phone: document.getElementById('phone').value,
+                balance: document.getElementById('balance').value
             };
             fetch('/clients', {
                 method: 'POST',
@@ -82,7 +85,8 @@
                 address: document.getElementById('updateAddress').value,
                 pesel: document.getElementById('updatePesel').value,
                 email: document.getElementById('updateEmail').value,
-                phone: document.getElementById('updatePhone').value
+                phone: document.getElementById('updatePhone').value,
+                balance: document.getElementById('updateBalance').value
             };
             fetch(`/clients/${id}`, {
                 method: 'PUT',
@@ -119,7 +123,7 @@
                     clientsList.innerHTML = '';
                     data.forEach(client => {
                         const li = document.createElement('li');
-                        li.textContent = `${client[1]} ${client[2]} - ${client[5]}`;
+                        li.textContent = `${client[1]} ${client[2]} - ${client[5]} - Balance: ${client[7]}`;
                         clientsList.appendChild(li);
                     });
                 });
@@ -136,6 +140,7 @@
                     document.getElementById('updatePesel').value = data.pesel;
                     document.getElementById('updateEmail').value = data.email;
                     document.getElementById('updatePhone').value = data.phone;
+                    document.getElementById('updateBalance').value = data.balance;
                 })
                 .catch(error => {
                     alert('Client not found');
