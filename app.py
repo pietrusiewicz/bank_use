@@ -50,6 +50,7 @@ def login():
         
         if user and check_password_hash(user[2], password):
             session['username'] = username
+            session['is_admin'] = user[3]
             flash('Login successful!', 'success')
             return redirect(url_for('index'))
         else:
@@ -59,20 +60,49 @@ def login():
 @app.route('/logout')
 def logout():
     session.pop('username', None)
+    session.pop('is_admin', None)
     flash('You have been logged out.', 'success')
     return redirect(url_for('login'))
 
+@app.route('/admin/login', methods=['GET', 'POST'])
+def admin_login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM Users WHERE username=? AND is_admin=1", (username,))
+        user = cursor.fetchone()
+        conn.close()
+        
+        if user and check_password_hash(user[2], password):
+            session['username'] = username
+            session['is_admin'] = True
+            flash('Admin login successful!', 'success')
+            return redirect(url_for('admin_panel'))
+        else:
+            flash('Invalid admin credentials. Please try again.', 'danger')
+    return render_template('admin_login.html')
+
 @app.route('/admin')
 def admin_panel():
-    if 'username' not in session:
-        return redirect(url_for('login'))
+    if 'username' not in session or not session.get('is_admin'):
+        return redirect(url_for('admin_login'))
     return render_template('admin.html', username=session['username'])
 
 @app.route('/user')
 def user_panel():
     if 'username' not in session:
         return redirect(url_for('login'))
-    return render_template('user.html', username=session['username'])
+    
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id FROM Users WHERE username=?", (session['username'],))
+    user_id = cursor.fetchone()[0]
+    conn.close()
+    
+    return render_template('user.html', username=session['username'], user_id=user_id)
 
 @app.route('/clients', methods=['GET'])
 def get_clients():
@@ -140,6 +170,35 @@ def delete_client(id):
     conn.commit()
     conn.close()
     return jsonify({'status': 'Client deleted'})
+
+@app.route('/transfer', methods=['POST'])
+def transfer_money():
+    data = request.get_json()
+    from_id = data['from_id']
+    to_id = data['to_id']
+    amount = data['amount']
+
+    conn = get_db()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT balance FROM Klienci WHERE id=?", (from_id,))
+    from_balance = cursor.fetchone()
+    if from_balance is None or from_balance[0] < amount:
+        conn.close()
+        return jsonify({'error': 'Insufficient funds or invalid sender ID'}), 400
+
+    cursor.execute("SELECT balance FROM Klienci WHERE id=?", (to_id,))
+    to_balance = cursor.fetchone()
+    if to_balance is None:
+        conn.close()
+        return jsonify({'error': 'Invalid recipient ID'}), 400
+
+    cursor.execute("UPDATE Klienci SET balance = balance - ? WHERE id=?", (amount, from_id))
+    cursor.execute("UPDATE Klienci SET balance = balance + ? WHERE id=?", (amount, to_id))
+    conn.commit()
+    conn.close()
+
+    return jsonify({'status': 'Transfer successful'})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)

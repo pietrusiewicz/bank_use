@@ -16,16 +16,58 @@
 
     <h2>Update Your Data</h2>
     <form id="updateUserForm">
+        <p>name:</p>
         <input type="text" id="updateName" placeholder="Name">
+        
+        <p>surname:</p>
         <input type="text" id="updateSurname" placeholder="Surname">
+        
+        <p>address:</p>
         <input type="text" id="updateAddress" placeholder="Address">
+        
+        <p>PESEL:</p>
         <input type="text" id="updatePesel" placeholder="PESEL">
+        
+        <p>email:</p>
         <input type="email" id="updateEmail" placeholder="Email">
+        
+        <p>phone number:</p>
         <input type="text" id="updatePhone" placeholder="Phone">
+        
         <button type="submit">Update Data</button>
     </form>
 
+    <h2>Transfer Money</h2>
+    <form id="transferForm">
+        <p>Enter the recipient's client ID:</p>
+        <input type="number" id="toId" placeholder="To Client ID" required>
+        
+        <p>Enter the amount to transfer:</p>
+        <input type="number" step="0.01" id="amount" placeholder="Amount" required>
+        
+        <button type="submit">Transfer</button>
+    </form>
+
     <script>
+        const userId = {{ user_id }}; // Assuming user_id is passed from the backend
+
+        // Fetch user data and fill the form
+        window.onload = function() {
+            fetch(`/clients/${userId}`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('updateName').value = data.name;
+                    document.getElementById('updateSurname').value = data.surname;
+                    document.getElementById('updateAddress').value = data.address;
+                    document.getElementById('updatePesel').value = data.pesel;
+                    document.getElementById('updateEmail').value = data.email;
+                    document.getElementById('updatePhone').value = data.phone;
+                })
+                .catch(error => {
+                    console.error('Error fetching user data:', error);
+                });
+        };
+
         document.getElementById('updateUserForm').addEventListener('submit', function(event) {
             event.preventDefault();
             const data = {
@@ -36,17 +78,42 @@
                 email: document.getElementById('updateEmail').value,
                 phone: document.getElementById('updatePhone').value
             };
-            fetch(`/clients/${id}`, {
+            fetch(`/clients/${userId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(data)
-            }).then(response => response.json())
-              .then(data => {
-                  alert('Data updated');
-                  document.getElementById('updateUserForm').reset();
-              });
+            }).then(response => {
+                if (response.ok) {
+                    alert('Data updated successfully!');
+                } else {
+                    alert('Failed to update data!');
+                }
+            });
+        });
+
+        document.getElementById('transferForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const data = {
+                from_id: userId,
+                to_id: document.getElementById('toId').value,
+                amount: document.getElementById('amount').value
+            };
+            fetch('/transfer', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            }).then(response => {
+                if (response.ok) {
+                    alert('Transfer successful');
+                    document.getElementById('transferForm').reset();
+                } else {
+                    alert('Transfer failed');
+                }
+            });
         });
     </script>
 </body>
