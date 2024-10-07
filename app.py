@@ -21,6 +21,26 @@ def get_clients():
     conn.close()
     return jsonify(rows)
 
+@app.route('/clients/<int:id>', methods=['GET'])
+def get_client(id):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM Klienci WHERE id=?", (id,))
+    row = cursor.fetchone()
+    conn.close()
+    if row:
+        return jsonify({
+            'id': row[0],
+            'name': row[1],
+            'surname': row[2],
+            'address': row[3],
+            'pesel': row[4],
+            'email': row[5],
+            'phone': row[6]
+        })
+    else:
+        return jsonify({'error': 'Client not found'}), 404
+
 @app.route('/clients', methods=['POST'])
 def add_client():
     data = request.get_json()
@@ -31,6 +51,17 @@ def add_client():
     conn.commit()
     conn.close()
     return jsonify({'status': 'Client added'}), 201
+
+@app.route('/clients/<int:id>', methods=['PUT'])
+def update_client(id):
+    data = request.get_json()
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE Klienci SET name=?, surname=?, address=?, pesel=?, email=?, phone=? WHERE id=?",
+                   (data['name'], data['surname'], data['address'], data['pesel'], data['email'], data['phone'], id))
+    conn.commit()
+    conn.close()
+    return jsonify({'status': 'Client updated'})
 
 @app.route('/clients/<int:id>', methods=['DELETE'])
 def delete_client(id):

@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bank Application</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        form { margin-bottom: 20px; }
+        input, button { margin: 5px; }
+    </style>
 </head>
 <body>
     <h1>Bank Application</h1>
@@ -19,9 +24,28 @@
         <button type="submit">Add Client</button>
     </form>
 
+    <h2>Update Client</h2>
+    <form id="updateClientForm">
+        <input min=1 type="number" id="updateId" placeholder="Client ID" required>
+        <button type="button" onclick="fetchClientData()">Fetch Client Data</button>
+        <input type="text" id="updateName" placeholder="Name">
+        <input type="text" id="updateSurname" placeholder="Surname">
+        <input type="text" id="updateAddress" placeholder="Address">
+        <input type="text" id="updatePesel" placeholder="PESEL">
+        <input type="email" id="updateEmail" placeholder="Email">
+        <input type="text" id="updatePhone" placeholder="Phone">
+        <button type="submit">Update Client</button>
+    </form>
+
     <h2>Clients</h2>
     <button onclick="getClients()">Get Clients</button>
     <ul id="clientsList"></ul>
+
+    <h2>Delete Client</h2>
+    <form id="deleteClientForm">
+        <input type="number" id="deleteId" placeholder="Client ID" required>
+        <button type="submit">Delete Client</button>
+    </form>
 
     <script>
         document.getElementById('addClientForm').addEventListener('submit', function(event) {
@@ -44,6 +68,45 @@
               .then(data => {
                   alert('Client added');
                   document.getElementById('addClientForm').reset();
+                  getClients();
+              });
+        });
+
+        document.getElementById('updateClientForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const id = document.getElementById('updateId').value;
+            const data = {
+                name: document.getElementById('updateName').value,
+                surname: document.getElementById('updateSurname').value,
+                address: document.getElementById('updateAddress').value,
+                pesel: document.getElementById('updatePesel').value,
+                email: document.getElementById('updateEmail').value,
+                phone: document.getElementById('updatePhone').value
+            };
+            fetch(`/clients/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            }).then(response => response.json())
+              .then(data => {
+                  alert('Client updated');
+                  document.getElementById('updateClientForm').reset();
+                  getClients();
+              });
+        });
+
+        document.getElementById('deleteClientForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const id = document.getElementById('deleteId').value;
+            fetch(`/clients/${id}`, {
+                method: 'DELETE'
+            }).then(response => response.json())
+              .then(data => {
+                  alert('Client deleted');
+                  document.getElementById('deleteClientForm').reset();
+                  getClients();
               });
         });
 
@@ -58,6 +121,23 @@
                         li.textContent = `${client[1]} ${client[2]} - ${client[5]}`;
                         clientsList.appendChild(li);
                     });
+                });
+        }
+
+        function fetchClientData() {
+            const id = document.getElementById('updateId').value;
+            fetch(`/clients/${id}`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('updateName').value = data.name;
+                    document.getElementById('updateSurname').value = data.surname;
+                    document.getElementById('updateAddress').value = data.address;
+                    document.getElementById('updatePesel').value = data.pesel;
+                    document.getElementById('updateEmail').value = data.email;
+                    document.getElementById('updatePhone').value = data.phone;
+                })
+                .catch(error => {
+                    alert('Client not found');
                 });
         }
     </script>
