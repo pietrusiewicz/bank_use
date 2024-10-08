@@ -50,7 +50,6 @@ def login():
         
         if user and check_password_hash(user[2], password):
             session['username'] = username
-            session['is_admin'] = user[3]
             flash('Login successful!', 'success')
             return redirect(url_for('index'))
         else:
@@ -60,35 +59,13 @@ def login():
 @app.route('/logout')
 def logout():
     session.pop('username', None)
-    session.pop('is_admin', None)
     flash('You have been logged out.', 'success')
     return redirect(url_for('login'))
 
-@app.route('/admin/login', methods=['GET', 'POST'])
-def admin_login():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        
-        conn = get_db()
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM Users WHERE username=? AND is_admin=1", (username,))
-        user = cursor.fetchone()
-        conn.close()
-        
-        if user and check_password_hash(user[2], password):
-            session['username'] = username
-            session['is_admin'] = True
-            flash('Admin login successful!', 'success')
-            return redirect(url_for('admin_panel'))
-        else:
-            flash('Invalid admin credentials. Please try again.', 'danger')
-    return render_template('admin_login.html')
-
 @app.route('/admin')
 def admin_panel():
-    if 'username' not in session or not session.get('is_admin'):
-        return redirect(url_for('admin_login'))
+    if 'username' not in session:
+        return redirect(url_for('login'))
     return render_template('admin.html', username=session['username'])
 
 @app.route('/user')
@@ -99,10 +76,15 @@ def user_panel():
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute("SELECT id FROM Users WHERE username=?", (session['username'],))
-    user_id = cursor.fetchone()[0]
+    user = cursor.fetchone()
     conn.close()
     
-    return render_template('user.html', username=session['username'], user_id=user_id)
+    if user:
+        user_id = user[0]
+        return render_template('user.html', username=session['username'], user_id=user_id)
+    else:
+        flash('User not found.', 'danger')
+        return redirect(url_for('logout'))
 
 @app.route('/clients', methods=['GET'])
 def get_clients():
