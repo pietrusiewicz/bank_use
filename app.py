@@ -13,7 +13,18 @@ def get_db():
 @app.route('/')
 def index():
     if 'username' in session:
-        return render_template('index.html', username=session['username'])
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute("SELECT id FROM Users WHERE username=?", (session['username'],))
+        user = cursor.fetchone()
+        conn.close()
+        
+        if user:
+            user_id = user[0]
+            return render_template('user.html', username=session['username'], user_id=user_id)
+        else:
+            flash('User not found.', 'danger')
+            return redirect(url_for('logout'))
     return redirect(url_for('login'))
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -21,12 +32,22 @@ def register():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
+        name = request.form['name']
+        surname = request.form['surname']
+        address = request.form['address']
+        pesel = request.form['pesel']
+        email = request.form['email']
+        phone = request.form['phone']
+        balance = request.form['balance']
+        
         hashed_password = generate_password_hash(password, method='sha256')
         
         conn = get_db()
         cursor = conn.cursor()
         try:
             cursor.execute("INSERT INTO Users (username, password) VALUES (?, ?)", (username, hashed_password))
+            cursor.execute("INSERT INTO Klienci (name, surname, address, pesel, email, phone, balance) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                           (name, surname, address, pesel, email, phone, balance))
             conn.commit()
             flash('Registration successful! Please log in.', 'success')
             return redirect(url_for('login'))
@@ -67,24 +88,6 @@ def admin_panel():
     if 'username' not in session:
         return redirect(url_for('login'))
     return render_template('admin.html', username=session['username'])
-
-@app.route('/user')
-def user_panel():
-    if 'username' not in session:
-        return redirect(url_for('login'))
-    
-    conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute("SELECT id FROM Users WHERE username=?", (session['username'],))
-    user = cursor.fetchone()
-    conn.close()
-    
-    if user:
-        user_id = user[0]
-        return render_template('user.html', username=session['username'], user_id=user_id)
-    else:
-        flash('User not found.', 'danger')
-        return redirect(url_for('logout'))
 
 @app.route('/clients', methods=['GET'])
 def get_clients():

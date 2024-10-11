@@ -4,14 +4,43 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        form { margin-bottom: 20px; }
+        input, button { margin: 5px; }
+    </style>
 </head>
 <body>
     <h1>Register</h1>
-    <form method="POST" action="{{ url_for('register') }}">
+    <form method="POST">
+        <p>Enter your username:</p>
         <input type="text" name="username" placeholder="Username" required>
+        
+        <p>Enter your password:</p>
         <input type="password" name="password" placeholder="Password" required>
+        
+        <p>Enter your name:</p>
+        <input type="text" name="name" placeholder="Name" required>
+        
+        <p>Enter your surname:</p>
+        <input type="text" name="surname" placeholder="Surname" required>
+        
+        <p>Enter your address:</p>
+        <input type="text" name="address" placeholder="Address" required>
+        
+        <p>Enter your PESEL:</p>
+        <input type="text" name="pesel" placeholder="PESEL" required>
+        
+        <p>Enter your email:</p>
+        <input type="email" name="email" placeholder="Email" required>
+        
+        <p>Enter your phone number:</p>
+        <input type="text" name="phone" placeholder="Phone" required>
+        
+        <p>Enter your initial balance:</p>
+        <input type="number" step="0.01" name="balance" placeholder="Balance" required>
+        
         <button type="submit">Register</button>
     </form>
-    <p>Already have an account? <a href="{{ url_for('login') }}">Login here</a>.</p>
 </body>
 </html>
