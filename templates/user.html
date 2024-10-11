@@ -12,26 +12,26 @@
 </head>
 <body>
     <h1>User Panel</h1>
-    <p>Welcome, {{ username }}! <a href="{{ url_for('logout') }}">Logout</a></p>
+    <p>Welcome, {{ username }}! Your User ID is: {{ user_id }} <a href="{{ url_for('logout') }}">Logout</a></p>
 
     <h2>Update Your Data</h2>
     <form id="updateUserForm">
-        <p>name:</p>
+        <p>Enter your name:</p>
         <input type="text" id="updateName" placeholder="Name">
         
-        <p>surname:</p>
+        <p>Enter your surname:</p>
         <input type="text" id="updateSurname" placeholder="Surname">
         
-        <p>address:</p>
+        <p>Enter your address:</p>
         <input type="text" id="updateAddress" placeholder="Address">
         
-        <p>PESEL:</p>
+        <p>Enter your PESEL:</p>
         <input type="text" id="updatePesel" placeholder="PESEL">
         
-        <p>email:</p>
+        <p>Enter your email:</p>
         <input type="email" id="updateEmail" placeholder="Email">
         
-        <p>phone number:</p>
+        <p>Enter your phone number:</p>
         <input type="text" id="updatePhone" placeholder="Phone">
         
         <button type="submit">Update Data</button>

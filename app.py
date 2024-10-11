@@ -1,26 +1,17 @@
 from flask import Flask, request, jsonify, render_template, redirect, url_for, session, flash
-import sqlite3
-from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.security import check_password_hash
+from db_operations import DatabaseOperations
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
-DATABASE = 'bank.db'
 
-def get_db():
-    conn = sqlite3.connect(DATABASE)
-    return conn
+db_ops = DatabaseOperations()
 
 @app.route('/')
 def index():
     if 'username' in session:
-        conn = get_db()
-        cursor = conn.cursor()
-        cursor.execute("SELECT id FROM Users WHERE username=?", (session['username'],))
-        user = cursor.fetchone()
-        conn.close()
-        
-        if user:
-            user_id = user[0]
+        user_id = db_ops.get_user_id(session['username'])
+        if user_id:
             return render_template('user.html', username=session['username'], user_id=user_id)
         else:
             flash('User not found.', 'danger')
@@ -40,21 +31,12 @@ def register():
         phone = request.form['phone']
         balance = request.form['balance']
         
-        hashed_password = generate_password_hash(password, method='sha256')
-        
-        conn = get_db()
-        cursor = conn.cursor()
-        try:
-            cursor.execute("INSERT INTO Users (username, password) VALUES (?, ?)", (username, hashed_password))
-            cursor.execute("INSERT INTO Klienci (name, surname, address, pesel, email, phone, balance) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                           (name, surname, address, pesel, email, phone, balance))
-            conn.commit()
+        if db_ops.add_user(username, password):
+            db_ops.add_client(name, surname, address, pesel, email, phone, balance)
             flash('Registration successful! Please log in.', 'success')
             return redirect(url_for('login'))
-        except sqlite3.IntegrityError:
+        else:
             flash('Username already exists. Please choose a different one.', 'danger')
-        finally:
-            conn.close()
     return render_template('register.html')
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -63,7 +45,7 @@ def login():
         username = request.form['username']
         password = request.form['password']
         
-        conn = get_db()
+        conn = db_ops.get_db()
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM Users WHERE username=?", (username,))
         user = cursor.fetchone()
@@ -94,7 +76,7 @@ def get_clients():
     if 'username' not in session:
         return redirect(url_for('login'))
     
-    conn = get_db()
+    conn = db_ops.get_db()
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM Klienci")
     rows = cursor.fetchall()
@@ -106,11 +88,7 @@ def get_client(id):
     if 'username' not in session:
         return redirect(url_for('login'))
     
-    conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM Klienci WHERE id=?", (id,))
-    row = cursor.fetchone()
-    conn.close()
+    row = db_ops.get_client(id)
     if row:
         return jsonify({
             'id': row[0],
@@ -128,18 +106,13 @@ def get_client(id):
 @app.route('/clients', methods=['POST'])
 def add_client():
     data = request.get_json()
-    conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute("INSERT INTO Klienci (name, surname, address, pesel, email, phone, balance) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                   (data['name'], data['surname'], data['address'], data['pesel'], data['email'], data['phone'], data['balance']))
-    conn.commit()
-    conn.close()
+    db_ops.add_client(data['name'], data['surname'], data['address'], data['pesel'], data['email'], data['phone'], data['balance'])
     return jsonify({'status': 'Client added'}), 201
 
 @app.route('/clients/<int:id>', methods=['PUT'])
 def update_client(id):
     data = request.get_json()
-    conn = get_db()
+    conn = db_ops.get_db()
     cursor = conn.cursor()
     cursor.execute("UPDATE Klienci SET name=?, surname=?, address=?, pesel=?, email=?, phone=?, balance=? WHERE id=?",
                    (data['name'], data['surname'], data['address'], data['pesel'], data['email'], data['phone'], data['balance'], id))
@@ -149,7 +122,7 @@ def update_client(id):
 
 @app.route('/clients/<int:id>', methods=['DELETE'])
 def delete_client(id):
-    conn = get_db()
+    conn = db_ops.get_db()
     cursor = conn.cursor()
     cursor.execute("DELETE FROM Klienci WHERE id=?", (id,))
     conn.commit()
@@ -163,7 +136,7 @@ def transfer_money():
     to_id = data['to_id']
     amount = data['amount']
 
-    conn = get_db()
+    conn = db_ops.get_db()
     cursor = conn.cursor()
 
     cursor.execute("SELECT balance FROM Klienci WHERE id=?", (from_id,))
